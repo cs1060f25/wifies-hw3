@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hello World Font Cycler</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400&family=Playfair+Display:wght@400&family=Courier+Prime:wght@400&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+        }
+
+        .hello-world {
+            font-size: 4rem;
+            font-weight: 400;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            transition: all 1s ease-in-out;
+            text-align: center;
+        }
+
+        .font-roboto {
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .font-playfair {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .font-courier {
+            font-family: 'Courier Prime', monospace;
+        }
+
+        @media (max-width: 768px) {
+            .hello-world {
+                font-size: 2.5rem;
+                padding: 0 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hello-world {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hello-world font-roboto" id="helloText">
+        Hello World
+    </div>
+
+    <script>
+        const fonts = ['font-roboto', 'font-playfair', 'font-courier'];
+        let currentFontIndex = 0;
+        const helloText = document.getElementById('helloText');
+
+        function cycleFonts() {
+            // Remove current font class
+            helloText.className = helloText.className.replace(/font-\w+/, '');
+            
+            // Add new font class
+            helloText.className += ` ${fonts[currentFontIndex]}`;
+            
+            // Move to next font
+            currentFontIndex = (currentFontIndex + 1) % fonts.length;
+        }
+
+        // Change font every 2 seconds
+        setInterval(cycleFonts, 2000);
+    </script>
+</body>
+</html>
