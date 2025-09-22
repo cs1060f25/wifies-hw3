@@ -1,9 +1,9 @@
 # AI StoryForge — Prototype
 
-**Author:** Ossimi Ziv
-**GitHub:** wifies
-**Deployed Version:** https://ai-story-forge.netlify.app/
-**Team PRD:** [PRD DOC LINK](https://docs.google.com/document/d/1Tu_tpIomwoIAXnEmw5HWW7LTYrBZ8-jsJhDoQ2uhOeQ/edit?usp=sharing)
+**Author:** Ossimi Ziv  
+**GitHub:** wifies  
+**Deployed Version:** https://ai-story-forge.netlify.app/  
+**Team PRD:** [PRD DOC LINK](https://docs.google.com/document/d/1Tu_tpIomwoIAXnEmw5HWW7LTYrBZ8-jsJhDoQ2uhOeQ/edit?usp=sharing)  
 
 ---
 
@@ -11,15 +11,15 @@
 
 **AI StoryForge** is a lightweight, **no-backend** prototype that helps creators outline and draft story episodes (Mysteries, YouTube series, multi-POV narratives) while maintaining continuity. It runs entirely in the browser and stores data in `localStorage`. This repo demonstrates a possible user journey: premise → outline → puzzles → scene drafts → release packet.
 
-**YES Included:** a quick, streamlined prototype for concept demonstration.
+**YES Included:** a quick, streamlined prototype for concept demonstration.  
 **NOT Included (yet):** a full AI system—logic that can train on inputted documents
 
 ---
 
 ## USAGE:
 
-* **Netlify (recommended):** `<https://your-netlify-site.netlify.app>`
-* **Static file:** open `index.html` directly in a browser
+* **Netlify (recommended):** https://ai-story-forge.netlify.app/    
+* **Static file:** open `index.html` directly in a browser  
 
 ---
 
@@ -37,7 +37,7 @@
    ```
 
 
-Or simply use the link, the whole project runs locally through web browser.
+Or simply use the link, the whole project runs locally through web browser. Open it and begin generating!
 
 ---
 
@@ -45,14 +45,14 @@ Or simply use the link, the whole project runs locally through web browser.
 
 ### 0) Project Setup & Canon
 
-* Enter **Series Title**, **Characters** (comma-separated), **World Rules** (one per line)
-* Auto **Canon Snapshot** (characters, rules) + basic KPIs (character/rule/scene counts)
-* Data stored locally via `localStorage` (no server)
+* Enter **Series Title**, **Characters** (comma-separated), **World Rules** (one per line)  
+* Auto **Canon Snapshot** (characters, rules) + basic KPIs (character/rule/scene counts)  
+* Data stored locally via `localStorage` (no server)  
 
-### 1) Premise & Tone
+### 1) Premise & Tone  
 
-* Write a one-sentence **logline**
-* Generate **logline variants** by style: *safe / wild / experimental* (heuristic)
+* Write a one-sentence **logline**  
+* Generate **logline variants** by style: *safe / wild / experimental* (heuristic)  
 
 ### 2) Outline & Beat Design
 
