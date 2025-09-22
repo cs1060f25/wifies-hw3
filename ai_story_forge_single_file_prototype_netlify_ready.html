@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI StoryForge – Prototype</title>
+  <style>
+    :root {
+      --bg: #0f1220; --panel:#171a2b; --muted:#9aa3b2; --text:#e8ebf4; --accent:#7dd3fc;
+      --ok:#22c55e; --warn:#fbbf24; --bad:#ef4444; --line:#2a2f45;
+    }
+    *{box-sizing:border-box} html,body{height:100%} body{
+      margin:0; background:linear-gradient(180deg,#0b0e1a,#101429);
+      color:var(--text); font:15px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Helvetica,Arial;
+    }
+    a{color:var(--accent); text-decoration:none}
+    .app{max-width:1100px; margin:0 auto; padding:24px}
+    header{display:flex; gap:16px; align-items:center; margin-bottom:16px}
+    .badge{padding:4px 8px; border:1px solid var(--line); color:var(--muted); border-radius:999px; font-size:12px}
+    .title{font-size:22px; font-weight:700}
+    .toolbar{display:flex; gap:8px; margin-left:auto}
+    button, .btn{background:#1e2236; color:#e8ebf4; border:1px solid var(--line); padding:8px 12px; border-radius:10px; cursor:pointer}
+    button:hover{background:#222743}
+    .primary{background:linear-gradient(180deg,#1f6feb,#0ea5e9); border-color:#0ea5e9}
+    .primary:hover{filter:brightness(1.05)}
+    .danger{border-color:#ef4444; color:#ffd6d6}
+    .grid{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+    .panel{background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:16px}
+    .panel h3{margin:0 0 10px 0; font-size:16px}
+    .row{display:flex; gap:8px; align-items:center}
+    input[type="text"], input[type="number"], textarea, select{
+      width:100%; background:#111427; color:var(--text); border:1px solid var(--line);
+      padding:8px 10px; border-radius:10px; outline:none
+    }
+    textarea{min-height:96px; resize:vertical}
+    .list{display:flex; flex-direction:column; gap:10px}
+    .beat, .scene, .card{border:1px solid var(--line); border-radius:12px; padding:10px; background:#12162a}
+    .muted{color:var(--muted)}
+    .pill{border:1px solid var(--line); padding:2px 8px; border-radius:999px; font-size:12px; color:var(--muted)}
+    .kpi{display:flex; gap:12px; flex-wrap:wrap}
+    .kpi > div{background:#12162a; border:1px solid var(--line); padding:10px 12px; border-radius:12px}
+    .flex{display:flex; gap:8px; align-items:center}
+    .space{height:10px}
+    .hr{border-top:1px dashed var(--line); margin:10px 0}
+    .code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace; background:#0d1021; border:1px solid #20233a; padding:8px 10px; border-radius:10px}
+    .ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+    .tabs{display:flex; gap:6px; flex-wrap:wrap}
+    .tab{padding:8px 10px; border-radius:10px; border:1px solid var(--line); background:#141834; cursor:pointer}
+    .tab.active{background:#1b2042}
+    .sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0}
+    .footnote{font-size:12px; color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="title">AI StoryForge – Prototype (No-Backend)</div>
+      <span class="badge">Single-file • Netlify-ready</span>
+      <div class="toolbar">
+        <button id="btnExportJSON" title="Download your project as JSON">Export JSON</button>
+        <button id="btnExportMD" title="Download your outline & scenes as Markdown">Export Markdown</button>
+        <button id="btnReset" class="danger" title="Clear local data">Reset</button>
+      </div>
+    </header>
+
+    <div class="tabs" id="tabs"></div>
+
+    <!-- SECTIONS -->
+    <section id="section-project" class="panel" data-tab="Project">
+      <h3>0) Project Setup & Canon</h3>
+      <div class="grid">
+        <div class="card">
+          <div class="row"><label for="title">Series / Project Title</label></div>
+          <input id="title" type="text" placeholder="e.g., Infinite Rooms: W/K/A" />
+          <div class="space"></div>
+          <div class="row"><label for="characters">Characters (comma‑separated)</label></div>
+          <input id="characters" type="text" placeholder="e.g., W, K, A, C, The Mask" />
+          <div class="space"></div>
+          <div class="row"><label for="rules">World Rules / Constraints (one per line)</label></div>
+          <textarea id="rules" placeholder="e.g., No teleportation\nMasks amplify desires\nEscape rooms reset at dawn"></textarea>
+          <div class="space"></div>
+          <div class="row"><label for="past">Optional: Paste prior notes/scripts (for context only; stays in your browser)</label></div>
+          <textarea id="past" placeholder="Paste snippets from earlier episodes, notes, bible…"></textarea>
+          <div class="space"></div>
+          <div class="footnote">Data is stored locally via <span class="code">localStorage</span>. Nothing is uploaded.</div>
+        </div>
+        <div class="card">
+          <b>Canon Snapshot (auto)</b>
+          <div class="hr"></div>
+          <div id="canonSnapshot" class="muted">No data yet.</div>
+          <div class="hr"></div>
+          <div class="kpi">
+            <div><b>Characters:</b> <span id="kpiCharacters">0</span></div>
+            <div><b>Rules:</b> <span id="kpiRules">0</span></div>
+            <div><b>Scenes:</b> <span id="kpiScenes">0</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="section-premise" class="panel" data-tab="Premise">
+      <h3>1) Premise & Tone</h3>
+      <div class="grid">
+        <div class="card">
+          <div class="row"><label for="logline">One‑sentence Premise / Logline</label></div>
+          <input id="logline" type="text" placeholder="A… must… before… or else…" />
+          <div class="space"></div>
+          <div class="row">
+            <label for="tone">Variant Style</label>
+            <select id="tone">
+              <option value="safe">Safe</option>
+              <option value="wild">Wild</option>
+              <option value="experimental">Experimental</option>
+            </select>
+            <button id="btnGenerateLoglines" class="primary">Generate Variants</button>
+          </div>
+        </div>
+        <div class="card">
+          <b>Variants</b>
+          <div id="variants" class="list muted"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="section-outline" class="panel" data-tab="Outline">
+      <h3>2) Outline & Beat Design</h3>
+      <div class="row">
+        <button id="btnGenerateOutline" class="primary">Auto‑Generate 8‑Beat Outline</button>
+        <button id="btnAddBeat">Add Custom Beat</button>
+      </div>
+      <div class="space"></div>
+      <div id="beats" class="list"></div>
+      <div class="hr"></div>
+      <div class="row">
+        <button id="btnSuggestPuzzles">Suggest Puzzle Mechanics</button>
+        <span class="pill">Fair‑Play Meter: <span id="fairplay" class="muted">—</span></span>
+      </div>
+      <div id="puzzles" class="list" style="margin-top:10px"></div>
+    </section>
+
+    <section id="section-scenes" class="panel" data-tab="Scenes">
+      <h3>3) Scene Drafting & Continuity Watcher</h3>
+      <div class="row">
+        <button id="btnAddScene" class="primary">Add Scene</button>
+        <button id="btnRunChecks">Run Continuity Checks</button>
+      </div>
+      <div class="space"></div>
+      <div id="scenes" class="list"></div>
+      <div class="hr"></div>
+      <div>
+        <b>Checks</b>
+        <div id="checks" class="list"></div>
+      </div>
+    </section>
+
+    <section id="section-report" class="panel" data-tab="Report">
+      <h3>4) Simple Release Packet</h3>
+      <div class="grid">
+        <div class="card">
+          <b>Hook Workshop</b>
+          <div class="space"></div>
+          <div class="row"><input id="hook" type="text" placeholder="Write an opening 10s hook…" /></div>
+          <div class="space"></div>
+          <button id="btnHookIdeas">Suggest Hook Variants</button>
+          <div id="hooks" class="list" style="margin-top:10px"></div>
+          <div class="hr"></div>
+          <b>Promise Check</b>
+          <div id="promiseCheck" class="muted">Write a hook to analyze.</div>
+        </div>
+        <div class="card">
+          <b>Production Packet Preview (Markdown)</b>
+          <div class="space"></div>
+          <pre id="mdPreview" class="code" style="max-height:360px; overflow:auto"></pre>
+        </div>
+      </div>
+    </section>
+
+    <p class="footnote">Prototype: on‑device heuristics only (no network/AI). You can deploy this single file to Netlify as‑is.</p>
+  </div>
+
+  <script>
+    // --- Minimal Single-File App State ---
+    const LS_KEY = 'storyforge_v1';
+    let state = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
+
+    const $ = (sel) => document.querySelector(sel);
+    const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+    const tabs = [
+      { id:'section-project',  label:'Project' },
+      { id:'section-premise',  label:'Premise' },
+      { id:'section-outline',  label:'Outline' },
+      { id:'section-scenes',   label:'Scenes' },
+      { id:'section-report',   label:'Report' },
+    ];
+
+    // --- Utilities ---
+    const uid = () => Math.random().toString(36).slice(2,10);
+    const seeded = (seed) => { // simple xorshift
+      let x = seed.split('').reduce((a,c)=>a + c.charCodeAt(0), 0) || 1234;
+      return () => (x = (x ^ (x << 13)) >>> 0, x = (x ^ (x >>> 17)) >>> 0, x = (x ^ (x << 5)) >>> 0, (x % 1e6)/1e6);
+    }
+    const dl = (name, text, type='text/plain') => {
+      const blob = new Blob([text], {type});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download=name; a.click();
+      setTimeout(()=>URL.revokeObjectURL(url), 1500);
+    }
+
+    function save() { localStorage.setItem(LS_KEY, JSON.stringify(state)); render(); }
+
+    // --- Canon Snapshot ---
+    function currentCanon() {
+      const chars = (state.characters || '').split(',').map(s=>s.trim()).filter(Boolean);
+      const rules = (state.rules || '').split('\n').map(s=>s.trim()).filter(Boolean);
+      return { chars, rules };
+    }
+
+    // --- Generators (heuristics; stand-ins for AI) ---
+    function generateLoglineVariants(base, mode) {
+      const styles = {
+        safe:      ['urgent','haunting','hidden','fractured','unseen','spiraling'],
+        wild:      ['impossible','paradoxical','forbidden','recursive','echoing','liminal'],
+        experimental:['diegetic','nonlinear','meta-coded','found-footage','time-broken','unreality']
+      };
+      const s = styles[mode] || styles.safe;
+      const r = seeded(base+mode);
+      const pick = () => s[Math.floor(r()*s.length)];
+      const twist = [
+        '…but every clue corrupts the last.',
+        '…and the exit demands a sacrifice.',
+        '…while a kinder truth hides in plain sight.',
+        '…as timelines splice with each choice.',
+        '…and the audience may be the final key.'
+      ][Math.floor(r()*5)];
+      const v1 = base.replace(/\.$/,'') + ` in a ${pick()} maze.`;
+      const v2 = `In a ${pick()} world, ${base.replace(/^\s*In\s+/i,'')}`;
+      const v3 = `${base.replace(/\.$/,'')}, ${twist}`;
+      return [v1,v2,v3];
+    }
+
+    function generateOutline(logline, chars) {
+      const names = chars.length? chars : ['Protagonist'];
+      const r = seeded(logline + names.join(','));
+      const pov = () => names[Math.floor(r()*names.length)];
+      const beats = [
+        {t:'Hook', d:`${pov()} faces an unsettling sign that their world has rules.`},
+        {t:'Inciting', d:`A rule is broken; a path opens but at a cost.`},
+        {t:'Plan', d:`${pov()} drafts a plan with a risky clue.`},
+        {t:'First Threshold', d:`Door shuts behind them; puzzle #1 seeds.`},
+        {t:'Midpoint', d:`Truth flips: ally or rule wasn’t what it seemed.`},
+        {t:'Second Threshold', d:`Clock starts; space compresses; puzzle #2 escalates.`},
+        {t:'Climax', d:`Choice between objective and person; payoff of clue trail.`},
+        {t:'Aftermath', d:`Partial win; unintended ripple tees next episode.`},
+      ];
+      return beats.map(b=>({ id:uid(), title:b.t, text:b.d }));
+    }
+
+    const PUZZLES = [
+      'Acrostic hidden in dialogue initials',
+      'Room layout forms a substitution key',
+      'Coordinates from props (clock, calendar, exit sign)',
+      'Audio spectrogram reveals phrase',
+      'Diegetic website with robots.txt clue',
+      'Vigenère keyed by episode title',
+      'Color-channel separation hides QR pattern',
+      'Ledger puzzle: odd/even page sums',
+    ];
+
+    function suggestPuzzles(chars, rules) {
+      const r = seeded((chars.join('-')||'x') + (rules.join('|')||'y'));
+      const picks = new Set();
+      while (picks.size < 3) picks.add(PUZZLES[Math.floor(r()*PUZZLES.length)]);
+      return Array.from(picks).map(p => ({ id:uid(), idea:p, anchor: (chars[0]||'A') }));
+    }
+
+    function fairPlayMeter(scenes, puzzles) {
+      if (!puzzles?.length) return '—';
+      const kw = ['clue','cipher','code','pattern','numbers','shift','symbol'];
+      const clues = scenes.reduce((acc,s)=>acc + (kw.some(k=>s.draft?.toLowerCase().includes(k))?1:0), 0);
+      if (clues >= 4) return 'High';
+      if (clues >= 2) return 'Medium';
+      return 'Low';
+    }
+
+    function continuityChecks() {
+      const { chars, rules } = currentCanon();
+      const known = new Set(chars.map(s=>s.toLowerCase()));
+      const violations = [];
+      (state.scenes||[]).forEach((s,i)=>{
+        const words = (s.draft||'').toLowerCase().match(/[a-zA-Z][a-zA-Z\-']+/g) || [];
+        // Unknown proper-like tokens (simple heuristic: capitalized in original and >2 letters)
+        const unknown = new Set();
+        (s.draft||'').replace(/\b([A-Z][a-zA-Z\-']{2,})\b/g, (m,w)=>{ if(!known.has(w.toLowerCase())) unknown.add(w); });
+        if (unknown.size) violations.push({type:'Unknown names', level:'warn', msg:`Scene ${i+1} has unrecognized names: ${Array.from(unknown).join(', ')}`});
+        // Rule violations: naive keyword match
+        rules.forEach(rule=>{
+          if (!rule) return;
+          const low = rule.toLowerCase();
+          const m = low.match(/no\s+([a-z ]+)/) || low.match(/never\s+([a-z ]+)/);
+          if (m){
+            const kw = m[1].trim().split(/\s+/)[0];
+            if ((s.draft||'').toLowerCase().includes(kw)) {
+              violations.push({type:'Rule breach', level:'bad', msg:`Scene ${i+1} may breach rule: "${rule}"`});
+            }
+          }
+        });
+      });
+      return violations;
+    }
+
+    // --- Rendering ---
+    function renderTabs(){
+      const tbar = $('#tabs');
+      tbar.innerHTML = '';
+      tabs.forEach((t,idx)=>{
+        const btn = document.createElement('button');
+        btn.className = 'tab' + (state.tab===t.id || (!state.tab && idx===0) ? ' active':'' );
+        btn.textContent = `${idx}. ${t.label}`;
+        btn.onclick = ()=>{ state.tab=t.id; save(); };
+        tbar.appendChild(btn);
+      });
+      $$('#tabs .tab').forEach((el,i)=>{
+        const secId = tabs[i].id; const active = (state.tab||tabs[0].id)===secId;
+        document.getElementById(secId).style.display = active? 'block':'none';
+      });
+    }
+
+    function renderCanon(){
+      const { chars, rules } = currentCanon();
+      $('#canonSnapshot').innerHTML = `
+        <div><b>Characters</b>: ${chars.map(c=>`<span class="pill">${c}</span>`).join(' ')||'<span class="muted">—</span>'}</div>
+        <div style="margin-top:6px"><b>Rules</b>: ${rules.map(r=>`<div class="pill" style="display:inline-block; margin:2px 4px 0 0">${r}</div>`).join('')||'<span class="muted">—</span>'}</div>
+      `;
+      $('#kpiCharacters').textContent = chars.length;
+      $('#kpiRules').textContent = rules.length;
+      $('#kpiScenes').textContent = (state.scenes||[]).length;
+    }
+
+    function renderVariants(){
+      const box = $('#variants'); box.innerHTML = '';
+      (state.variants||[]).forEach(v=>{
+        const div = document.createElement('div'); div.className='card';
+        div.textContent = v; box.appendChild(div);
+      });
+    }
+
+    function renderBeats(){
+      const box = $('#beats'); box.innerHTML = '';
+      (state.beats||[]).forEach((b,idx)=>{
+        const el = document.createElement('div'); el.className='beat';
+        el.innerHTML = `
+          <div class="row" style="justify-content:space-between">
+            <div class="flex"><b>${idx+1}. </b> &nbsp; <input data-beat-title="${b.id}" type="text" value="${b.title||''}" /></div>
+            <button data-del-beat="${b.id}">Delete</button>
+          </div>
+          <div class="space"></div>
+          <textarea data-beat-text="${b.id}">${b.text||''}</textarea>
+        `;
+        box.appendChild(el);
+      });
+      box.querySelectorAll('[data-del-beat]').forEach(btn=> btn.onclick = (e)=>{
+        const id = e.currentTarget.getAttribute('data-del-beat');
+        state.beats = (state.beats||[]).filter(x=>x.id!==id); save();
+      });
+      box.querySelectorAll('[data-beat-title]').forEach(inp=> inp.oninput = (e)=>{
+        const id = e.currentTarget.getAttribute('data-beat-title');
+        const it = state.beats.find(x=>x.id===id); it.title = e.currentTarget.value; save();
+      });
+      box.querySelectorAll('[data-beat-text]').forEach(inp=> inp.oninput = (e)=>{
+        const id = e.currentTarget.getAttribute('data-beat-text');
+        const it = state.beats.find(x=>x.id===id); it.text = e.currentTarget.value; save();
+      });
+    }
+
+    function renderPuzzles(){
+      const box = $('#puzzles'); box.innerHTML = '';
+      (state.puzzles||[]).forEach((p,idx)=>{
+        const el = document.createElement('div'); el.className='card';
+        el.innerHTML = `
+          <div class="row" style="justify-content:space-between">
+            <b>P${idx+1}: ${p.idea}</b>
+            <span class="pill">Anchor: ${p.anchor}</span>
+          </div>
+        `;
+        box.appendChild(el);
+      });
+      $('#fairplay').textContent = fairPlayMeter(state.scenes||[], state.puzzles||[]);
+    }
+
+    function renderScenes(){
+      const box = $('#scenes'); box.innerHTML = '';
+      (state.scenes||[]).forEach((s,idx)=>{
+        const el = document.createElement('div'); el.className='scene';
+        el.innerHTML = `
+          <div class="row" style="justify-content:space-between">
+            <div class="row" style="gap:6px">
+              <b>Scene ${idx+1}</b>
+              <input data-scene-title="${s.id}" type="text" value="${s.title||''}" placeholder="Title" />
+              <input data-scene-pov="${s.id}" type="text" value="${s.pov||''}" placeholder="POV (e.g., W)" style="width:160px"/>
+            </div>
+            <button data-del-scene="${s.id}">Delete</button>
+          </div>
+          <div class="space"></div>
+          <textarea data-scene-draft="${s.id}" placeholder="Draft the scene…">${s.draft||''}</textarea>
+        `;
+        box.appendChild(el);
+      });
+      box.querySelectorAll('[data-del-scene]').forEach(btn=> btn.onclick = (e)=>{
+        const id = e.currentTarget.getAttribute('data-del-scene');
+        state.scenes = (state.scenes||[]).filter(x=>x.id!==id); save();
+      });
+      box.querySelectorAll('[data-scene-title]').forEach(inp=> inp.oninput = (e)=>{
+        const id = e.currentTarget.getAttribute('data-scene-title');
+        const it = state.scenes.find(x=>x.id===id); it.title = e.currentTarget.value; save();
+      });
+      box.querySelectorAll('[data-scene-pov]').forEach(inp=> inp.oninput = (e)=>{
+        const id = e.currentTarget.getAttribute('data-scene-pov');
+        const it = state.scenes.find(x=>x.id===id); it.pov = e.currentTarget.value; save();
+      });
+      box.querySelectorAll('[data-scene-draft]').forEach(inp=> inp.oninput = (e)=>{
+        const id = e.currentTarget.getAttribute('data-scene-draft');
+        const it = state.scenes.find(x=>x.id===id); it.draft = e.currentTarget.value; save();
+      });
+    }
+
+    function renderChecks(){
+      const box = $('#checks'); box.innerHTML = '';
+      const issues = state.checks||[];
+      if(!issues.length){ box.innerHTML = '<div class="muted">No issues yet. Write scenes and run checks.</div>'; return; }
+      issues.forEach(ch=>{
+        const el = document.createElement('div'); el.className='card';
+        const level = ch.level==='bad' ? 'bad' : ch.level==='warn' ? 'warn':'ok';
+        el.innerHTML = `<b class="${level}">${ch.type}</b><div class="muted">${ch.msg}</div>`;
+        box.appendChild(el);
+      });
+    }
+
+    function buildMarkdown(){
+      const { chars, rules } = currentCanon();
+      const beats = (state.beats||[]).map((b,i)=>`**${i+1}. ${b.title}**\n${b.text}`).join('\n\n');
+      const puzzles = (state.puzzles||[]).map((p,i)=>`- P${i+1}: ${p.idea} (anchor: ${p.anchor})`).join('\n') || '- —';
+      const scenes = (state.scenes||[]).map((s,i)=>`### Scene ${i+1}: ${s.title||'Untitled'} (POV: ${s.pov||'—'})\n${(s.draft||'').trim()}`).join('\n\n');
+      const md = `# ${state.title||'Untitled Project'}\n\n**Logline:** ${state.logline||'—'}\n\n**Characters:** ${chars.join(', ')||'—'}\n\n**Rules:**\n${rules.map(r=>`- ${r}`).join('\n')||'- —'}\n\n---\n\n## Outline\n${beats}\n\n---\n\n## Puzzle Suggestions\n${puzzles}\n\n---\n\n## Scenes\n${scenes}\n`;
+      $('#mdPreview').textContent = md;
+      return md;
+    }
+
+    function promiseCheck(){
+      const h = (state.hook||'').toLowerCase();
+      if(!h){ $('#promiseCheck').textContent = 'Write a hook to analyze.'; return; }
+      const hypeWords = ['shocking','never before','impossible','proof','exposed'];
+      const spoilers = ['killer is','the code is','solution is'];
+      const flags = [];
+      if (hypeWords.some(w=>h.includes(w))) flags.push('Possible over‑promise');
+      if (spoilers.some(w=>h.includes(w))) flags.push('Spoiler risk');
+      $('#promiseCheck').innerHTML = flags.length ? flags.map(f=>`<div class="warn">• ${f}</div>`).join('') : '<span class="ok">Looks reasonable.</span>';
+    }
+
+    // --- Wiring ---
+    function bindInputs(){
+      $('#title').value = state.title||''; $('#title').oninput = e=>{ state.title=e.target.value; save(); }
+      $('#characters').value = state.characters||''; $('#characters').oninput = e=>{ state.characters=e.target.value; save(); }
+      $('#rules').value = state.rules||''; $('#rules').oninput = e=>{ state.rules=e.target.value; save(); }
+      $('#past').value = state.past||''; $('#past').oninput = e=>{ state.past=e.target.value; save(); }
+      $('#logline').value = state.logline||''; $('#logline').oninput = e=>{ state.logline=e.target.value; save(); }
+      $('#tone').value = state.tone||'safe'; $('#tone').onchange = e=>{ state.tone=e.target.value; save(); }
+      $('#hook').value = state.hook||''; $('#hook').oninput = e=>{ state.hook=e.target.value; save(); promiseCheck(); }
+
+      $('#btnGenerateLoglines').onclick = ()=>{
+        const vs = generateLoglineVariants(state.logline||'', state.tone||'safe');
+        state.variants = vs; save();
+      };
+      $('#btnGenerateOutline').onclick = ()=>{
+        const { chars } = currentCanon();
+        state.beats = generateOutline(state.logline||'', chars); save();
+      };
+      $('#btnAddBeat').onclick = ()=>{
+        state.beats = state.beats||[];
+        state.beats.push({id:uid(), title:'Custom Beat', text:''}); save();
+      };
+      $('#btnSuggestPuzzles').onclick = ()=>{
+        const { chars, rules } = currentCanon();
+        state.puzzles = suggestPuzzles(chars, rules); save();
+      };
+      $('#btnAddScene').onclick = ()=>{
+        state.scenes = state.scenes||[];
+        state.scenes.push({id:uid(), title:'', pov:'', draft:''}); save();
+      };
+      $('#btnRunChecks').onclick = ()=>{
+        state.checks = continuityChecks(); save();
+      };
+      $('#btnExportJSON').onclick = ()=>{
+        dl((state.title||'storyforge')+'.json', JSON.stringify(state, null, 2), 'application/json');
+      };
+      $('#btnExportMD').onclick = ()=>{
+        const md = buildMarkdown();
+        dl((state.title||'storyforge')+'.md', md, 'text/markdown');
+      };
+      $('#btnReset').onclick = ()=>{
+        if(confirm('Clear local data?')){ localStorage.removeItem(LS_KEY); location.reload(); }
+      };
+    }
+
+    function render(){
+      renderTabs();
+      renderCanon();
+      renderVariants();
+      renderBeats();
+      renderPuzzles();
+      renderScenes();
+      renderChecks();
+      buildMarkdown();
+      promiseCheck();
+    }
+
+    // Bootstrap
+    (function init(){
+      // Seed initial structure
+      state = Object.assign({
+        tab: state.tab || 'section-project',
+        title: state.title || '',
+        characters: state.characters || '',
+        rules: state.rules || '',
+        past: state.past || '',
+        logline: state.logline || '',
+        tone: state.tone || 'safe',
+        variants: state.variants || [],
+        beats: state.beats || [],
+        puzzles: state.puzzles || [],
+        scenes: state.scenes || [],
+        checks: state.checks || [],
+        hook: state.hook || ''
+      }, state);
+      // Build tabs UI once
+      const t = $('#tabs'); t.innerHTML = '';
+      tabs.forEach((tab, i)=>{
+        const b = document.createElement('button'); b.className = 'tab'; b.textContent = `${i}. ${tab.label}`; t.appendChild(b);
+      });
+      bindInputs();
+      render();
+    })();
+  </script>
+</body>
+</html>
