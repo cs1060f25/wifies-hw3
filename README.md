@@ -1,9 +1,9 @@
 # AI StoryForge — Prototype
 
-**Author:** `Ossimi Ziv`
-**GitHub:** `wifies`
-**Deployed Version:** `https://ai-story-forge.netlify.app/`
-**Team PRD:** `[PRD DOC LINK](https://docs.google.com/document/d/1Tu_tpIomwoIAXnEmw5HWW7LTYrBZ8-jsJhDoQ2uhOeQ/edit?usp=sharing)`
+**Author:** Ossimi Ziv
+**GitHub:** wifies
+**Deployed Version:** https://ai-story-forge.netlify.app/
+**Team PRD:** [PRD DOC LINK](https://docs.google.com/document/d/1Tu_tpIomwoIAXnEmw5HWW7LTYrBZ8-jsJhDoQ2uhOeQ/edit?usp=sharing)
 
 ---
 
@@ -37,12 +37,7 @@
    ```
 
 
-## Project Structure
-
-```
-/ (root)
-└── index.html   # All HTML, CSS, and JS in one file; no dependencies
-```
+Or simply use the link, the whole project runs locally through web browser.
 
 ---
 
